@@ -1,0 +1,36 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+struct tnode trie_head;
+
+struct tnode {
+	char pre[128];
+    struct tnode *tp[26];
+    char word[128];
+    bool word;
+};
+
+void insert_node(struct tnode *trie_head, char *str)
+{
+	c = str[0];
+    while (str[cindex]!='\0) {
+		cnode = get_node(node, cindex);
+        if (cnode == NULL) {
+			create_node(str, cindex);
+        } else {
+            cindex = cnode->letters + cindex;
+        } 
+    }
+}
+
+
+void inser_word_trie(char *str)
+{
+	insert_node(trie_head, str);
+}
+
+int main()
+{
+	insert_word_trie("flower");
+    insert_word_trie("flow");
+}

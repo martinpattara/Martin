@@ -1,0 +1,452 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <stdint.h>
+
+//537264819
+#define containerofnode(elem, member, pointer) (struct elem *)((void *)pointer - (void *) &(((struct elem *)0)->member))
+ 
+struct blist {
+    struct blist *rnext;
+    struct blist *lnext;
+};
+
+struct elem {
+	int a;
+    struct blist node;
+};
+
+struct list {
+    struct list *next;
+};
+
+struct lelem {
+    int a;
+    struct list node;
+};
+
+
+struct qelem {
+    struct blist *a;
+    struct list node;
+};
+
+void list_insert_head(struct list **head, struct list *node)
+{
+    node->next = *head;
+    *head = node;
+}
+
+struct list *list_pop(struct list **head)
+{
+   struct list *node;
+   node = *head;
+   if (*head == NULL)
+        return NULL;
+   *head  = (*head)->next;
+   return node;
+}
+
+void list_insert_tail(struct list **head, struct list *node)
+{
+    struct list **ptr;
+
+    ptr = head;
+    while (*ptr != NULL) {
+        ptr = &((*ptr)->next);
+    }
+    *ptr = node;
+}
+
+void insert_tail(struct list **head, struct blist *x)
+{
+    struct qelem *p;
+
+    p = malloc(sizeof(*p));
+    p->a = x;
+    p->node.next = NULL;
+    list_insert_tail(head, &p->node);
+}
+
+void insert_head(struct list **head, struct blist *x)
+{
+    struct qelem *p;
+
+    p = malloc(sizeof(*p));
+    p->a = x;
+    p->node.next = NULL;
+    list_insert_head(head, &p->node);
+}
+
+void blist_insert(struct blist **head, struct blist *node, int x)
+{
+    struct blist **ptr;
+    struct elem *entry;
+ 
+    ptr = head;
+    while (*ptr != NULL) {
+        entry = containerofnode(elem, node, *ptr);
+        if (x > entry->a) {
+            ptr = &((*ptr)->rnext);
+            printf("Right node\n");
+           
+        }  else { 
+            ptr = &((*ptr)->lnext);
+            printf("Left node\n");
+        }
+    }
+    *ptr = node;
+}
+
+void insert(int x, struct blist **head)
+{
+    struct elem *entry;
+    entry = malloc(sizeof(struct elem));
+    entry->a = x;
+    entry->node.rnext = NULL;
+    entry->node.lnext = NULL;
+    blist_insert(head, &entry->node, x);
+    
+}
+#if 0
+void print_list(struct list *head)
+{
+    struct elem *p;
+
+    while(head != NULL) {
+        p = containerofnode(elem, node, head);
+        printf("%x %x\n", p->a, head);
+        head = head->next;
+    }
+}
+#endif
+
+void print_blist_inorder_recursive(struct blist *head)
+{
+   struct elem *p;
+   
+   if (head == NULL)
+       return;
+
+    print_blist_inorder_recursive(head->lnext);
+
+    p = containerofnode(elem, node, head);
+    printf("%d\n", p->a);
+
+    print_blist_inorder_recursive(head->rnext);
+}
+
+void insert_stack(struct list **qhead, struct blist *ptr)
+{
+
+    while (ptr != NULL) {
+        insert_head(qhead, ptr);
+        ptr = ptr->lnext;
+    }
+}
+
+void print_blist_inorder(struct blist *ptr)
+{
+   struct list *qhead = NULL;
+   struct list *node;
+   struct qelem *q;
+   struct elem *p; 
+  
+    insert_stack(&qhead, ptr); 
+    while(node = list_pop(&qhead)) {
+        q = containerofnode(qelem, node, node);
+        p = containerofnode(elem, node, (q->a));
+        printf("%d\n", p->a);
+        insert_stack(&qhead, q->a->rnext);
+    } 
+}
+
+
+void print_blist_preorder(struct blist *head)
+{
+   struct list *qhead = NULL;
+   struct list *node;
+   struct qelem *q;
+   struct elem *p; 
+   
+   insert_tail(&qhead, head);
+   while(node = list_pop(&qhead)) {
+      q = containerofnode(qelem, node, node);
+      p = containerofnode(elem, node, (q->a));
+      printf("%d\n", p->a);
+      if (q->a->rnext) {
+    //       p = containerofnode(elem, node, (q->a->lnext));
+     //     printf(" queueing  %d\n", p->a);
+           insert_head(&qhead, q->a->rnext);
+      }
+      if (q->a->lnext) {
+       //   p = containerofnode(elem, node, (q->a->rnext));
+       //   printf("queueing %d\n", p->a); 
+          insert_head(&qhead, q->a->lnext);
+      }
+   }
+}
+
+
+
+
+void print_blist_bfs(struct blist *head)
+{
+   struct list *qhead = NULL;
+   struct list *node;
+   struct qelem *q;
+   struct elem *p; 
+   
+   insert_tail(&qhead, head);
+   while(node = list_pop(&qhead)) {
+      q = containerofnode(qelem, node, node);
+      p = containerofnode(elem, node, (q->a));
+      printf("%d\n", p->a);
+      if (q->a->lnext) {
+    //       p = containerofnode(elem, node, (q->a->lnext));
+     //     printf(" queueing  %d\n", p->a);
+           insert_tail(&qhead, q->a->lnext);
+      }
+      if (q->a->rnext) {
+       //   p = containerofnode(elem, node, (q->a->rnext));
+       //   printf("queueing %d\n", p->a); 
+          insert_tail(&qhead, q->a->rnext);
+      }
+   }
+}
+struct blist* sortedArrayToBST(int* nums, int numsSize)
+{
+   int mid;
+   struct elem *entry;
+
+   if (numsSize == 0) 
+       return NULL;
+   
+   mid = numsSize/2;
+   printf("Mid value of array in sortedArrayToBST is %d %d\n", nums[mid], numsSize);
+   entry = malloc(sizeof(struct elem));
+   entry->a = nums[mid];
+   entry->node.lnext = sortedArrayToBST(nums, mid );
+   entry->node.rnext = sortedArrayToBST(&nums[mid +1], (numsSize-mid) -1 );
+   return  &(entry->node);
+  
+
+}
+struct list *get_middle_node(struct list *head)
+{
+    struct list *slow, *fast, *prevslow;
+    slow = fast = head;
+    while (fast!= NULL && fast->next != NULL) {
+       prevslow = slow; 
+       slow = slow->next;
+       fast = fast->next->next;
+    }
+    prevslow->next = NULL;
+    
+    return slow;
+}
+
+struct blist * sortedlistToBST(struct list *head)
+{
+    struct list *mid;
+    struct lelem *p;
+    struct elem *entry;
+
+    if (head == NULL)
+        return NULL;
+
+
+    if (head->next == NULL) {
+        p = containerofnode(lelem, node, head);
+        entry = malloc(sizeof(struct elem));
+        entry->a = p->a;
+        return &(entry->node);
+    }
+    
+    mid = get_middle_node(head);
+    p = containerofnode(lelem, node, mid);
+    entry = malloc(sizeof(struct elem));
+    entry->a = p->a;
+    printf("P->a = %d\n", p->a);
+    entry->node.lnext = sortedlistToBST(head);
+    entry->node.rnext = sortedlistToBST(mid->next);
+    return &(entry->node);
+}
+
+
+
+struct list * arraytolist(int* nums, int numsSize)
+{
+    int i;
+    struct list *head = NULL;
+    for(i = 0; i < numsSize; i++) {
+       struct lelem *p;
+
+       p = malloc(sizeof(*p));
+       p->a = nums[i];
+       p->node.next = NULL;
+       list_insert_tail(&head, &p->node);
+    }
+    return head; 
+}
+#define MAX_H(a, b)  a > b ? a : b
+
+int maxheight_tree(struct blist *head)
+{
+    int height_left, height_right;
+
+    if (head == NULL) {
+        return 0;
+    }
+    height_left = maxheight_tree(head->lnext);
+    height_right = maxheight_tree(head->rnext);
+    return MAX_H(height_left, height_right) + 1;
+}
+
+#define MIN_H(a, b)  a < b ? a : b
+
+int minheight_tree(struct blist *head)
+{
+    int height_left, height_right;
+
+    if (head == NULL) {
+        return 0;
+    }
+    height_left = minheight_tree(head->lnext);
+    height_right = minheight_tree(head->rnext);
+    return MIN_H(height_left, height_right) + 1;
+}
+
+int isbst(struct blist *head) 
+{
+    struct elem *p, *q;
+    int res = 0;
+
+    if (head->lnext) {
+        p = containerofnode(elem, node, (head));
+        q = containerofnode(elem, node, (head->lnext)); 
+        if (p->a < q->a) {
+            return -1;
+        } 
+        res = isbst(head->lnext);
+    }
+    if (!res) {
+       if (head->rnext) {
+           p = containerofnode(elem, node, (head));
+           q = containerofnode(elem, node, (head->rnext));
+           if (p->a > q->a){
+             return -1;
+           }
+           
+res =  isbst(head->rnext);
+       }
+    }
+    return res;
+}
+
+void flatten_tree(struct blist *head)
+{
+    struct blist *ptr, *tmp;
+    
+    if (head == NULL) {
+        return;
+    }
+    flatten_tree(head->lnext);
+    tmp = head->rnext;
+    head->rnext = head->lnext;
+    head->lnext = NULL;
+    ptr = head;
+    while(ptr->rnext != NULL) {
+        ptr = ptr->rnext;
+    }
+    ptr->rnext = tmp;
+    flatten_tree(head->rnext); 
+    return;
+}
+
+int get_kth_element(struct blist *head, int k)
+{
+
+    struct blist *cur, *lnode, *rnode, *prev;
+    struct elem *p;
+
+	if (head == NULL)
+        return 0;
+    
+    cur = head;
+
+    while (cur != NULL) {
+        prev = cur;
+        if (cur->lnext == NULL) {
+            k--;
+            cur = cur->rnext;
+        } else {
+            lnode = cur->lnext;
+            while (lnode->rnext != NULL && lnode->rnext != cur) {
+                lnode = lnode->rnext;
+            }
+            if (lnode->rnext == NULL) {
+                lnode->rnext = cur;
+                cur = cur->lnext;
+            }
+            if (lnode->rnext == cur) {
+               k--;
+               cur = cur->rnext;
+            }
+        }
+        if (k == 0) {
+            p = containerofnode(elem, node, prev);
+            return p->a;
+        }
+           
+    }
+}
+
+void print_list(struct list *head)
+{
+    struct lelem *p;
+
+    while(head != NULL) {
+        p = containerofnode(lelem, node, head);
+        printf("%d %x\n", p->a, head);
+        head = head->next;
+    }
+}
+
+
+int main()
+{
+    struct blist *head = NULL;
+    struct list *lhead = NULL;
+    struct list *thead = NULL;
+    int x[] = {1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19};
+    int u[] = {18,19,6,5,4,3,2,1,7,8,9,10,11,12,13,14,15,16,17};  
+    int mid;
+    
+    mid = sizeof(x)/sizeof(int)/2;
+    printf("Mid value of array is %d\n", x[mid]);
+    head  = sortedArrayToBST(x, sizeof(x)/sizeof(int));
+   
+    
+    
+//    print_blist_preorder(head);
+    print_blist_inorder(head);
+//      print_blist_postorder(head);
+    lhead = arraytolist(x, sizeof(x)/sizeof(int));
+    print_list(lhead);
+    head = sortedlistToBST(lhead);
+    print_blist_inorder(head);
+    printf("Max height of tree %d\n", maxheight_tree(head));
+    printf("Min height of tree %d\n", maxheight_tree(head));
+    //flatten_tree(head);
+    print_blist_inorder(head);
+    printf("Kth element is %d\n", get_kth_element(head, 5));
+//    head  = sortedArrayToBST(u, sizeof(u)/sizeof(int));
+//    printf("is bst %d\n", isbst(head));
+   
+//    thead = get_middle_mode(lhead);
+//    printf("Printing from middle\n");
+//    print_list(thead);
+//    printf("Printing from start after making it half\n");
+//    print_list(lhead);
+
+}

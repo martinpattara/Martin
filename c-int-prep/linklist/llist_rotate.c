@@ -74,6 +74,57 @@ void rotate_list(struct list **head, struct list *p, int *n)
         (*n)--; 
     } 
 }
+#if 0
+/******* with temperory variable***/
+struct list * rotate_list_nonreccursive(struct list *head, int n)
+{
+    struct list *p,*q, *prev, *qprev;
+    p = q =  head;
+    
+    while (p != NULL) {
+        prev = p;
+        p = p->next;
+     
+        if (n) { 
+            n--;
+        } else {
+           qprev = q;
+           q = q->next;
+        }
+    }
+    prev->next = head;
+    qprev->next = NULL;
+    return q;
+   
+}
+#endif
+#if 1
+struct list * rotate_list_nonreccursive(struct list *head, int n)
+{
+    struct list **p,**q, *prev, *qprev, *new_head;;
+    p = q =  &head;
+
+    while (*p!= NULL) {
+        p = &((*p)->next);
+
+        if (n) {
+            n--;
+        } else {
+            q = &((*q)->next);
+        }
+    }
+    if (q == &head)  {
+        return head;
+    } else {
+        *p = head;
+        new_head = *q;
+        *q = NULL;
+    
+        return new_head;
+    }
+
+}
+#endif
 
 void swap(struct list **head, struct list *p)
 {
@@ -118,8 +169,6 @@ int main()
             break;
     }
     print_list(head);
-    while (n > 0) {
-       rotate_list(&head, head, &n);
-    }
+    head = rotate_list_nonreccursive(head, 3);
     print_list(head);
 }

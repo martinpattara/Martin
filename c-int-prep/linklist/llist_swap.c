@@ -54,7 +54,8 @@ void k_reverse(struct list **head, struct list *p, int k)
    *head = prev;
    k_reverse(next_head, p, k);
 }
-
+#if 0
+/**** Double pointer version******/
 void swap(struct list **head, struct list *p)
 {
   struct list *temp, **next_head;
@@ -70,6 +71,21 @@ void swap(struct list **head, struct list *p)
   *next_head = NULL;
   swap(next_head, temp);
 
+}
+#endif
+struct list *swap(struct list *head)
+{
+    struct list *p = head;
+    struct list *tmp;
+
+    if ((p == NULL) ||(p->next == NULL))
+        return p;
+    
+    head = p->next;
+    tmp = head->next;
+    head->next = p;
+    p->next = swap(tmp);
+    return head;
 }
 void print_list(struct list *head)
 {
@@ -98,6 +114,6 @@ int main()
             break;
     }
     print_list(head);
-    swap(&head, head);
+    head = swap(head);
     print_list(head);
 }

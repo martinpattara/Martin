@@ -28,7 +28,7 @@ void print_blist_preorder_recursive(struct blist *head)
 
     print_blist_preorder_recursive(head->rnext);
 }
-
+#if 0
 struct blist* tree_to_vine_iteratinve(struct blist **root)
 {
     struct blist *p, *r, **q;
@@ -48,7 +48,24 @@ struct blist* tree_to_vine_iteratinve(struct blist **root)
         }
     }
 }
+#endif
 
+struct blist* tree_to_vine_iteratinve(struct blist **root)
+{
+    struct blist *r, **q;
+
+    q = root;
+    while (*q != NULL) {
+        if ((*q)->lnext) {
+            r = (*q)->lnext;
+            (*q)->lnext = (*q)->lnext->rnext;
+            r->rnext = *q;
+           *q = r;
+        } else {
+           q = &((*q)->rnext);
+        }
+    }
+}
 
 struct blist* sortedArrayToBST(int* nums, int numsSize)
 {

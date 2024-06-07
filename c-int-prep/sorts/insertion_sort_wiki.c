@@ -60,7 +60,7 @@ void insertion_sort(int *a)
 int main()
 {
     int a[10] = {4,2,3,6,5,9,8,1,7,10};
-    insertion_sort(a);
+    insertion_sort_wiki(a);
 
     for (int i = 0; i < N; i++) {
         printf("%d", a[i]);

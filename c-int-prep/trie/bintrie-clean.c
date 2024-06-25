@@ -31,11 +31,8 @@ uint32_t get_mask(unsigned int p, int n)
       m =  m << 1;
    }
    m = ~m;
-   //return m;
    return (m  & (~0 << (op - n)));
 }
-
-
 
 struct tnode *  create_node(uint32_t ip, int pos, uint32_t  mlen, bool leaf, char *name)
 {
@@ -63,22 +60,8 @@ int ffs(int x)
    }
    return i;
 }
-#if 0
-uint32_t get_mask(unsigned int p, int n)
-{
-   int m = ~0;
-   int op = 32 - p;
 
-   for (int i = 0; i < 32 - p; i++) {
-      m =  m << 1;
-   }
-   m = ~m;
-   //return m;
-   return (m  & (~0 << (op - n)));
-}
-#endif
-
-uint32_t add_bits(struct tnode *node, uint32_t ip, uint32_t pos, char *name)
+uint32_t add_bits(struct tnode *node, uint32_t ip, uint32_t pos)
 {
     uint32_t mask, x;
     struct tnode  **cnode_ptr;
@@ -93,8 +76,6 @@ uint32_t add_bits(struct tnode *node, uint32_t ip, uint32_t pos, char *name)
         return pos +  node->mlen;
     } else {
         x = ffs(x);
-    //    node->mlen =  (x -  node->pos);
-      //  node->pos = x;
         cnode_ptr = get_node_ptr(node, ((node->prefix >> (31 - x)) & 0x01));
         *cnode_ptr = create_node(node->prefix, x, node->mlen - (x -  node->pos),  1, node->devname);
         node->mlen = (x -  node->pos);
@@ -149,31 +130,11 @@ void insert_node(struct tnode *trie_head, uint32_t prefix, uint32_t mlen, char *
     for (cnode_ptr = get_node_ptr(node, ((p_prefix >> (31 - pos)) & 0x01));
          *cnode_ptr != NULL;
          cnode_ptr = get_node_ptr(*cnode_ptr, ((p_prefix >> (31-pos)) & 0x01))) { 
-         pos = add_bits(*cnode_ptr, prefix, pos, name);
+         pos = add_bits(*cnode_ptr, prefix, pos);
          printf("Pos = %d\n", pos);
-      //   p_prefix  = p_prefix << pos;
          printf("prefix = %x\n", ((p_prefix >> (31 - pos)) & 0x01));
-    //     if (++i == 5)
-      //       break;
-        // mlen = mlen - pos;
     }
     *cnode_ptr = create_node(prefix, pos, mlen - pos,  1, name);
-    
-/*
-      while (p_prefix = p_prefix << pos) {
-        cnode_ptr = get_node_ptr(node, p_prefix & (0x01 << 31));
-        if (*cnode_ptr == NULL) {
-           *cnode_ptr = create_node(str, pos, mask,  1);
-           printf("Cnode pointer %x\n", *cnode_ptr);
-           advance = (*cnode_ptr)->bits;
-        } else {
-           advance = add_bits(*cnode_ptr, str, cindex);
-        }
-        pos = advance + cindex;
-        node = *cnode_ptr;
-    }
-*/
-
 }
 
 void insert_route(uint32_t ip, uint32_t mlen, char *name)

@@ -66,12 +66,12 @@ int populate_str(struct tnode *node, char *str, int cindex)
 		}
         tindex = node->pre[i] - 'a';
         printf("Tindex = %d %c\n", tindex, node->pre[i]);
-        ptr =  create_node(node->word, i, node->letters - i,
+        ptr =  create_node(node->pre,  i, node->letters - i,
                                        orig_cword);
         memcpy(ptr->tp, node->tp, 26 *sizeof(struct tnode *));
         printf("Cnode pointer %x\n", ptr);
+        memset(node->tp, 0x0, 26 *sizeof(struct tnode *)); 
         node->tp[tindex]  = ptr;
-        node->tp[node->letters] = NULL;
         node->letters = i;
         strcpy(node->word, str);
         return node->letters;
@@ -108,9 +108,9 @@ void print_trie(struct tnode *root)
 
     node = root;
     printf("print_trie %x\n", root);
-    if (node->cword) {
-        printf("%s\n", node->word);
-    }
+//    if (node->cword) {
+//        printf("%s\n", node->word);
+//    }
     for (i = 0; i < node->letters; i++) {
        printf("%c", node->pre[i]);
     }
@@ -133,12 +133,14 @@ int match_str(struct tnode *node, char *str, char cindex, char len)
     int i = 0; 
 
     for (i = 0; i < node->letters; i++) {
+         printf("%c\n", node->pre[i]);
          if (node->pre[i] != str[cindex +i]) {
+             printf("breaking %c\n", node->pre[i]);
              break;
          }
     }
     if (i == node->letters) {
-        if (str[cindex + i] == '\0') {
+        if ((str[cindex + i] == '\0') && (node->cword == true)) {
             printf("%d %d\n", cindex, i);
             return 0;
         } else {
@@ -178,6 +180,8 @@ bool trie_lookup(struct tnode *root, char *str)
             node = *cnode_ptr;
         }
      }
+     printf("Word not found exit loop\n");
+     return false;
 }
 	
 
@@ -188,13 +192,15 @@ bool word_lookup(char *str)
 
 int main()
 {   
-    insert_word_trie("flower");
+    insert_word_trie("fl");
+  //  print_trie(&trie_head);
     insert_word_trie("flow");
-    insert_word_trie("flew"); 
+  //  print_trie(&trie_head);
+    insert_word_trie("flee"); 
   //  insert_word_trie("flow"); 
-//	insert_word_trie("flower");
-    print_trie(&trie_head);
+	insert_word_trie("flea");
+   print_trie(&trie_head);
    // insert_word_trie("flow");
-   word_lookup("flew");
+   word_lookup("flee");
 
 }
